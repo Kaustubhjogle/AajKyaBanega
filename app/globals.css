@@ -1,26 +1,108 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0d1110;
+  --foreground: #edf3ed;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0)) top/100% 1px no-repeat,
+    radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.03), transparent 22%),
+    radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.025), transparent 26%);
+  opacity: 0.85;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(74, 222, 128, 0.22);
+  color: #f4f7f4;
+}
+
+.panel-surface {
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
+    var(--surface);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.025),
+    0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+.app-shell {
+  --surface: rgba(13, 18, 16, 0.86);
+  --surface-raised: rgba(255, 255, 255, 0.035);
+  --line: rgba(255, 255, 255, 0.085);
+  --line-strong: rgba(255, 255, 255, 0.14);
+  --accent: #27835f;
+  --accent-soft: rgba(47, 160, 116, 0.16);
+  --accent-light: #75d8ad;
+  background:
+    radial-gradient(circle at 5% 5%, rgba(50, 135, 99, 0.16), transparent 27rem),
+    radial-gradient(circle at 94% 93%, rgba(185, 117, 47, 0.1), transparent 28rem),
+    #0d1110;
+}
+
+.app-shell[data-theme="light"] {
+  --surface: rgba(250, 252, 248, 0.92);
+  --surface-raised: rgba(29, 44, 34, 0.055);
+  --line: rgba(20, 39, 28, 0.11);
+  --line-strong: rgba(20, 39, 28, 0.19);
+  --accent: #217052;
+  --accent-soft: rgba(33, 112, 82, 0.11);
+  --accent-light: #196247;
+  background:
+    radial-gradient(circle at 5% 5%, rgba(110, 184, 139, 0.19), transparent 28rem),
+    radial-gradient(circle at 94% 93%, rgba(245, 184, 106, 0.19), transparent 27rem),
+    #eef3ec;
+  color: #14261a;
+}
+
+.app-shell[data-theme="light"] .text-zinc-100 { color: #15251a; }
+.app-shell[data-theme="light"] .text-zinc-200 { color: #26392d; }
+.app-shell[data-theme="light"] .text-zinc-300 { color: #3e5144; }
+.app-shell[data-theme="light"] .text-zinc-400 { color: #526457; }
+.app-shell[data-theme="light"] .text-zinc-500 { color: #627468; }
+.app-shell[data-theme="light"] .text-zinc-600 { color: #748579; }
+.app-shell[data-theme="light"] .bg-zinc-950,
+.app-shell[data-theme="light"] .bg-zinc-900,
+.app-shell[data-theme="light"] .bg-white\/\[0\.02\],
+.app-shell[data-theme="light"] .bg-white\/\[0\.03\],
+.app-shell[data-theme="light"] .bg-white\/\[0\.04\] { background-color: var(--surface-raised); }
+.app-shell[data-theme="light"] .border-white\/6,
+.app-shell[data-theme="light"] .border-white\/7,
+.app-shell[data-theme="light"] .border-white\/8,
+.app-shell[data-theme="light"] .border-white\/10 { border-color: var(--line); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }

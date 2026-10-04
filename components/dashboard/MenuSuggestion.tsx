@@ -12,9 +12,10 @@ import {
   ForkKnife,
   CheckCircle,
   CaretDown,
+  Shuffle,
 } from "@phosphor-icons/react";
 import { motion } from "motion/react";
-import type { RecipeLibraryItem } from "@/lib/recipe-library";
+import { TOMORROW_COLLECTION, type RecipeLibraryItem } from "@/lib/recipe-library";
 
 type BadgeTone = "green" | "amber" | "orange" | "neutral";
 
@@ -46,6 +47,7 @@ export function MenuSuggestion({
   savedMeals,
   onToggleBookmark,
   onCookMeal,
+  onShuffleTomorrow,
 }: {
   groups: readonly SuggestionGroup[];
   onRefresh: () => void;
@@ -53,6 +55,7 @@ export function MenuSuggestion({
   savedMeals: readonly string[];
   onToggleBookmark: (title: string) => void;
   onCookMeal: (meal: RecipeDisplayItem) => void;
+  onShuffleTomorrow: () => void;
 }) {
   const [expandedRecipe, setExpandedRecipe] = useState<string | null>(null);
   return (
@@ -87,14 +90,19 @@ export function MenuSuggestion({
 
       {groups.map((group, groupIndex) => (
         <div key={group.label} className={groupIndex > 0 ? "border-t border-white/6" : "border-t border-white/6"}>
-          <div className="flex items-center gap-3 px-6 py-6 text-zinc-400">
-            <CalendarBlank size={18} weight="thin" />
-            <p className="text-[0.95rem] uppercase tracking-[0.12em] text-zinc-200">
-              {group.label}
-              {group.suffix ? (
-                <span className="ml-2 text-zinc-500">{group.suffix}</span>
-              ) : null}
-            </p>
+          <div className="flex items-center justify-between gap-3 px-6 py-6 text-zinc-400">
+            <div className="flex items-center gap-3">
+              <CalendarBlank size={18} weight="thin" />
+              <p className="text-[0.95rem] uppercase tracking-[0.12em] text-zinc-200">
+                {group.label}
+                {group.suffix ? <span className="ml-2 text-zinc-500">{group.suffix}</span> : null}
+              </p>
+            </div>
+            {group.label === TOMORROW_COLLECTION ? (
+              <button type="button" onClick={onShuffleTomorrow} className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[var(--line-strong)] px-3 py-2 text-xs font-medium normal-case text-zinc-200 transition hover:bg-white/[0.05] active:translate-y-px">
+                <Shuffle size={15} weight="bold" /> Shuffle menu
+              </button>
+            ) : null}
           </div>
 
           <div className="grid gap-4 px-6 pb-6 md:grid-cols-2">

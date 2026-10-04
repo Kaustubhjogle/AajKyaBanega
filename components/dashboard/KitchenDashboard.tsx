@@ -11,7 +11,7 @@ import { motion } from "motion/react";
 import { CookingHistory } from "./CookingHistory";
 import { InventoryList } from "./InventoryList";
 import { MenuSuggestion } from "./MenuSuggestion";
-import { recipeLibrary, type RecipeLibraryItem, type RecipeTone } from "@/lib/recipe-library";
+import { recipeLibrary, TOMORROW_COLLECTION, type RecipeLibraryItem, type RecipeTone } from "@/lib/recipe-library";
 
 type FridgeUnit = "kgs" | "items";
 
@@ -176,6 +176,7 @@ export function KitchenDashboard() {
   const [savedMeals, setSavedMeals] = useState<string[]>([]);
   const [history, setHistory] = useState<CookingHistoryItem[]>([]);
   const [refreshSeed, setRefreshSeed] = useState(0);
+  const [tomorrowShuffleSeed, setTomorrowShuffleSeed] = useState(0);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [notice, setNotice] = useState("");
@@ -257,6 +258,11 @@ export function KitchenDashboard() {
     setLastRefreshedAt(new Date());
   };
 
+  const shuffleTomorrowMenu = () => {
+    setTomorrowShuffleSeed((value) => value + 1);
+    setNotice("Menu has been shuffled.");
+  };
+
   const resetInventory = () => {
     setInventory(initialInventoryItems);
     setSavedMeals([]);
@@ -314,7 +320,7 @@ export function KitchenDashboard() {
     }, new Map<string, { label: string; suffix?: string; meals: RecipeLibraryItem[] }>()),
   )
     .map(([, group]) => {
-      const meals = group.meals
+      const sortedMeals = group.meals
       .map((meal) => {
         const scoreDetails = scoreMeal(meal, inventory, refreshSeed);
         const matchTone: RecipeTone =
@@ -362,6 +368,13 @@ export function KitchenDashboard() {
         return left.sortTieBreaker - right.sortTieBreaker;
       })
       .map(({ meal }) => meal);
+
+      const meals = group.label === TOMORROW_COLLECTION && sortedMeals.length > 1
+        ? [
+            ...sortedMeals.slice(tomorrowShuffleSeed % sortedMeals.length),
+            ...sortedMeals.slice(0, tomorrowShuffleSeed % sortedMeals.length),
+          ]
+        : sortedMeals;
 
       return {
         ...group,
@@ -429,6 +442,7 @@ export function KitchenDashboard() {
               savedMeals={savedMeals}
               onToggleBookmark={toggleSavedMeal}
               onCookMeal={cookMeal}
+              onShuffleTomorrow={shuffleTomorrowMenu}
             />
           </motion.div>
 

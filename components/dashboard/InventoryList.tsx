@@ -3,11 +3,13 @@
 import { useState } from "react";
 import {
   Acorn,
+  CaretDown,
   Cube,
   DotsThree,
   Egg,
   FlowerTulip,
   Leaf,
+  MagnifyingGlass,
   Orange,
   Pepper,
   Trash,
@@ -15,6 +17,7 @@ import {
   SidebarSimple,
 } from "@phosphor-icons/react";
 import { motion } from "motion/react";
+import { recipeLibrary } from "@/lib/recipe-library";
 
 type InventoryItem = {
   id: string;
@@ -44,6 +47,13 @@ function formatQuantity(quantity: number, unit: InventoryItem["unit"]) {
   return `${displayQuantity} ${unit}`;
 }
 
+const quickAddOptions = Array.from(
+  new Set(recipeLibrary.flatMap((recipe) => recipe.ingredients)),
+).sort((left, right) => left.localeCompare(right));
+
+const formatIngredientName = (value: string) =>
+  value.replace(/\b\w/g, (letter) => letter.toUpperCase());
+
 export function InventoryList({
   items,
   onToggleItem,
@@ -57,16 +67,28 @@ export function InventoryList({
   onResetInventory: () => void;
   onRemoveItem: (id: string) => void;
 }) {
-  const [itemChoice, setItemChoice] = useState("");
-  const [customName, setCustomName] = useState("");
+  const [itemName, setItemName] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [unit, setUnit] = useState<InventoryItem["unit"]>("items");
   const [error, setError] = useState("");
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [activeOptionIndex, setActiveOptionIndex] = useState(-1);
+
+  const filteredOptions = quickAddOptions.filter((option) =>
+    option.includes(itemName.trim().toLowerCase()),
+  );
+
+  const selectIngredient = (ingredient: string) => {
+    setItemName(formatIngredientName(ingredient));
+    setError("");
+    setIsPickerOpen(false);
+    setActiveOptionIndex(-1);
+  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const trimmedName = (itemChoice === "custom" ? customName : itemChoice).trim();
+    const trimmedName = itemName.trim();
     const parsedQuantity = Number(quantity);
 
     if (!trimmedName || !Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
@@ -80,8 +102,7 @@ export function InventoryList({
       unit,
     });
 
-    setItemChoice("");
-    setCustomName("");
+    setItemName("");
     setQuantity("1");
     setUnit("items");
     setError("");
@@ -121,35 +142,67 @@ export function InventoryList({
             <span className="text-xs uppercase tracking-[0.14em] text-zinc-500">
               Item
             </span>
-            <select
-              aria-label="Choose an item to add"
-              value={itemChoice}
-              onChange={(event) => { setItemChoice(event.target.value); setError(""); }}
-              className="h-11 w-full rounded-[12px] border border-white/8 bg-white/[0.02] px-4 text-base text-zinc-200 outline-none"
-            >
-              <option value="" disabled>Choose an item</option>
-              <option value="Spinach">Spinach</option>
-              <option value="Paneer">Paneer</option>
-              <option value="Eggs">Eggs</option>
-              <option value="Chicken Breast">Chicken breast</option>
-              <option value="Tomatoes">Tomatoes</option>
-              <option value="Onions">Onions</option>
-              <option value="Potatoes">Potatoes</option>
-              <option value="Green Chillies">Green chillies</option>
-              <option value="custom">Add a custom item</option>
-            </select>
-          </label>
+            <div className="relative">
+              <MagnifyingGlass size={17} weight="thin" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <input
+                aria-autocomplete="list"
+                aria-controls="quick-add-items"
+                aria-expanded={isPickerOpen}
+                aria-label="Search or add an item"
+                role="combobox"
+                value={itemName}
+                onFocus={() => setIsPickerOpen(true)}
+                onBlur={() => setIsPickerOpen(false)}
+                onChange={(event) => {
+                  setItemName(event.target.value);
+                  setError("");
+                  setIsPickerOpen(true);
+                  setActiveOptionIndex(-1);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
+                    setIsPickerOpen(false);
+                    return;
+                  }
 
-          {itemChoice === "custom" ? <label className="col-span-2 flex flex-col gap-2">
-            <span className="text-xs uppercase tracking-[0.14em] text-zinc-500">Custom item</span>
-            <input
-              aria-label="Custom item name"
-              value={customName}
-              onChange={(event) => { setCustomName(event.target.value); setError(""); }}
-              placeholder="For example, coriander"
-              className="h-11 rounded-[12px] border border-white/8 bg-white/[0.02] px-4 text-base text-zinc-200 outline-none placeholder:text-zinc-600"
-            />
-          </label> : null}
+                  if (event.key === "ArrowDown") {
+                    event.preventDefault();
+                    setIsPickerOpen(true);
+                    setActiveOptionIndex((current) => Math.min(current + 1, filteredOptions.length - 1));
+                  }
+
+                  if (event.key === "ArrowUp") {
+                    event.preventDefault();
+                    setActiveOptionIndex((current) => Math.max(current - 1, 0));
+                  }
+
+                  if (event.key === "Enter" && isPickerOpen && activeOptionIndex >= 0) {
+                    event.preventDefault();
+                    selectIngredient(filteredOptions[activeOptionIndex]);
+                  }
+                }}
+                placeholder="Search ingredients or type your own"
+                className="h-11 w-full rounded-[12px] border border-white/8 bg-white/[0.02] py-0 pl-11 pr-11 text-base text-zinc-200 outline-none placeholder:text-zinc-600"
+              />
+              <CaretDown size={16} weight="bold" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+
+              {isPickerOpen ? <div id="quick-add-items" role="listbox" className="absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-xl border border-[var(--line-strong)] bg-[var(--surface)] p-1.5 shadow-[0_18px_40px_rgba(0,0,0,0.28)]">
+                {filteredOptions.length > 0 ? filteredOptions.map((option, index) => (
+                  <button
+                    key={option}
+                    type="button"
+                    role="option"
+                    aria-selected={activeOptionIndex === index}
+                    onMouseDown={(event) => { event.preventDefault(); selectIngredient(option); }}
+                    className={`flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm transition ${activeOptionIndex === index ? "bg-[var(--accent-soft)] text-[var(--accent-light)]" : "text-zinc-200 hover:bg-white/[0.05]"}`}
+                  >
+                    {formatIngredientName(option)}
+                  </button>
+                )) : <p className="px-3 py-2.5 text-sm text-zinc-500">No match. Add “{itemName}” as a custom item.</p>}
+              </div> : null}
+            </div>
+            <span className="text-xs text-zinc-500">Choose a common ingredient or type a custom item.</span>
+          </label>
 
           <label className="flex flex-col gap-2">
             <span className="text-xs uppercase tracking-[0.14em] text-zinc-500">

@@ -1,5 +1,7 @@
 export type RecipeTone = "green" | "amber" | "orange" | "neutral";
 
+export const TOMORROW_COLLECTION = "Tomorrow";
+
 export type RecipeLibraryItem = {
   id: string;
   collection: string;
@@ -17,7 +19,7 @@ export type RecipeLibraryItem = {
 export const recipeLibrary: readonly RecipeLibraryItem[] = [
   {
     id: "palak-paneer-roti",
-    collection: "Tomorrow",
+    collection: TOMORROW_COLLECTION,
     collectionSuffix: "(Maid's Menu)",
     title: "Palak Paneer & Roti",
     description:
@@ -38,7 +40,7 @@ export const recipeLibrary: readonly RecipeLibraryItem[] = [
   },
   {
     id: "egg-bhurji-roti",
-    collection: "Tomorrow",
+    collection: TOMORROW_COLLECTION,
     collectionSuffix: "(Maid's Menu)",
     title: "Egg Bhurji & Roti",
     description: "Simple, protein-rich and quick to prepare.",
@@ -58,7 +60,7 @@ export const recipeLibrary: readonly RecipeLibraryItem[] = [
   },
   {
     id: "fridge-omelette",
-    collection: "Tomorrow",
+    collection: TOMORROW_COLLECTION,
     collectionSuffix: "(Maid's Menu)",
     title: "From-the-Fridge Omelette",
     description: "Fast breakfast using eggs, herbs and whatever vegetables are left.",
